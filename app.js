@@ -3,11 +3,17 @@
 const express = require('express')
 const mongoose = require('mongoose')
 const passport = require('passport')
+const session = require('express-session')
+const userRoutes = require('./routes/user')
+const githubAuth = require('./config/passportGithub')
+const User = require('./models/user')
 
 const port = 3000
 
 const app = express()
 
+githubAuth(passport)
+//mongodb connection logic
 mongoose.connect(`mongodb://localhost:27017/thirdPartyauthwithSession`, 
     {  
         useNewUrlParser: true,
@@ -20,12 +26,37 @@ mongoose.connect(`mongodb://localhost:27017/thirdPartyauthwithSession`,
         console.log(`something went wrong`)
     })
 
-
+//express middleware
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
+//session logic
+app.use(session({
+    secret: 'keyboard cat',
+    resave: false,
+    saveUninitialized: false
+}))
+
+//passport middleware
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.serializeUser(function(user, done) {
+    done(null, user.id)
+});
+  
+passport.deserializeUser(function(id, done) {
+    User.findById(id, function(err, user) {
+        done(err, user)
+    });
+});
+
+
+app.use('/users', userRoutes)
+
 app.get(`/`, (req, res) => {
-    res.status(200).json({ msg: 'welcome to the homepage' })
+    console.log(req.user)
+    res.send('welcome to the homepage')
 })
 
 app.listen(port, () => {

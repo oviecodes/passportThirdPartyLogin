@@ -16,12 +16,16 @@ const userSchema = new mongoose.Schema({
     password: {
         type: String,
         required: true
+    },
+    login: {
+        type: String,
+        required: true
     }
 
 })
 
 userSchema.pre('save', async function() {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
        try {
             const salt = await bcrypt.genSalt(10)
             resolve(this.password = await bcrypt.hash(this.password, salt))
@@ -33,7 +37,7 @@ userSchema.pre('save', async function() {
 })
 
 userSchema.methods.validPassword = async function(password){
-    return new Promise((resolve, reject) => { 
+    return new Promise(async (resolve, reject) => { 
         try {
             resolve(await bcrypt.compare(password, this.password))
         } catch (error) {
