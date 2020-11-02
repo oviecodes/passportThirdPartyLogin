@@ -6,6 +6,7 @@ const passport = require('passport')
 const session = require('express-session')
 const userRoutes = require('./routes/user')
 const githubAuth = require('./config/passportGithub')
+const facebookAuth = require('./config/passportFacebook')
 const User = require('./models/user')
 
 const port = 3000
@@ -13,6 +14,7 @@ const port = 3000
 const app = express()
 
 githubAuth(passport)
+facebookAuth(passport)
 //mongodb connection logic
 mongoose.connect(`mongodb://localhost:27017/thirdPartyauthwithSession`, 
     {  

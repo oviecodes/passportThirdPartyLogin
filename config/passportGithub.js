@@ -30,8 +30,7 @@ module.exports = async(passport) => {
                     length: 10,
                     numbers: true
                 }), 
-                name,
-                login: github
+                name
             });
             return done(null, newUser)
         }
