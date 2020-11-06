@@ -2,9 +2,8 @@
 
 require('dotenv').config()
 const GitHubStrategy = require('passport-github2').Strategy
+const { findOrCreateUser } = require('./socialLogic')
 const User = require('../models/user')
-const generator = require('generate-password');
- 
 
 module.exports = async(passport) => {
     passport.use(
@@ -15,24 +14,14 @@ module.exports = async(passport) => {
             callbackURL: process.env.GITHUB_CALLBACK_URL
         },
         async function(accessToken, refreshToken, profile, done) {
-            const { displayName: name, emails } = profile
-            const [emailValue, ..._] = emails
-            const { value: email } = emailValue
-            console.log(name, email, accessToken)
-            const user = await User.findOne({ email })
-            if(user) {
-                return done(null, user)
-            }
+            
+            const { username, emails } = profile
+            const [emailfield, ..._] = emails
+            const email = emailfield.value
+            
+            //find or create a new user
+            findOrCreateUser(User, email, username, done)
 
-            const newUser = await User.create({ 
-                email, 
-                password: generator.generate({
-                    length: 10,
-                    numbers: true
-                }), 
-                name
-            });
-            return done(null, newUser)
         }
     ));
 }
