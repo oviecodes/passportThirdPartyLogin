@@ -3,8 +3,8 @@
 
 require('dotenv').config()
 const FacebookStrategy = require('passport-facebook').Strategy
+const { findOrCreateUser } = require('./socialLogic')
 const User = require('../models/user')
-const generator = require('generate-password');
 
 
 module.exports = function(passport) {
@@ -16,22 +16,13 @@ module.exports = function(passport) {
             profileFields: ['id', 'displayName', 'email']
         },
         async function(accessToken, refreshToken, profile, done) {
-            console.log(profile._json)
-            const { name, email } = profile._json
+
+            const { name: username, email } = profile._json
             const user = await User.findOne({ email })
-            if(user) {
-                return done(null, user)
-            }
-            
-            const newUser = await User.create({
-                name,
-                email,
-                password: generator.generate({
-                    length: 10,
-                    numbers: true
-                }), 
-            })
-            return done(null, newUser)
+
+            //find or create a new user
+            findOrCreateUser(User, email, username, done)
+           
         }
     ))
 }
