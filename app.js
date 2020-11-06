@@ -7,14 +7,16 @@ const session = require('express-session')
 const userRoutes = require('./routes/user')
 const githubAuth = require('./config/passportGithub')
 const facebookAuth = require('./config/passportFacebook')
+const twitterAuth = require('./config/passportTwitter')
 const User = require('./models/user')
 
 const port = 3000
 
 const app = express()
 
-githubAuth(passport)
-facebookAuth(passport)
+const authStrategies = [githubAuth, facebookAuth, twitterAuth]
+
+authStrategies.forEach((el) => el(passport))
 //mongodb connection logic
 mongoose.connect(`mongodb://localhost:27017/thirdPartyauthwithSession`, 
     {  
@@ -57,7 +59,6 @@ passport.deserializeUser(function(id, done) {
 app.use('/users', userRoutes)
 
 app.get(`/`, (req, res) => {
-    console.log(req.user)
     res.send('welcome to the homepage')
 })
 
