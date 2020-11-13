@@ -47,6 +47,12 @@ router.get('/auth/twitter/callback', notauth,
         res.redirect('/users/dashboard');
     })
 
+router.route('/logout')
+    .get(async function(req, res){
+        req.logout();
+        res.redirect('/');
+    })
+
 router.route('/dashboard')
     .all(isauth)
     .get(
